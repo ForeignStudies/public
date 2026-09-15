@@ -1,0 +1,6 @@
+# 1. 安装brew（前面给过完整命令）
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# 2. 安装RDP服务端xrdp
+brew install xrdp
+# 3. 启动服务
+sudo brew services start xrdp

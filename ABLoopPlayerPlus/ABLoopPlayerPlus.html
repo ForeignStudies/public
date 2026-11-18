@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AB Loop Player · 跟读练习</title>
+  <link rel="shortcut icon" type="image/x-icon" href="png/favicon.ico" />
+  <link href="css/main.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app-shell" id="appShell">
+    <!-- 左侧：历史文件 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-top">
+        <button class="icon-btn" id="panelToggleBtn" title="收起 / 展开侧栏">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /></svg>
+        </button>
+        <button class="icon-btn" id="refreshBtn" title="重新扫描">
+          <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" /></svg>
+        </button>
+        <button class="icon-btn" id="addBtn" title="添加本地文件">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+      </div>
+      <div class="side-head">
+        <span data-i18n="downloads">文件</span>
+        <span class="side-head-right"><span class="chev">⌄</span><span id="fileCount">0</span></span>
+      </div>
+      <div class="file-list" id="fileList"></div>
+      <div class="side-foot" id="sideFoot" data-i18n="sideFoot">文件仅保存在本机</div>
+    </aside>
+
+    <!-- 右侧：主区 + 底部控制条 -->
+    <div class="main-col">
+      <div class="main-scroll" id="mainScroll">
+        <header class="content-head">
+          <div class="head-left">
+            <button class="icon-btn expand-side-btn" id="expandSideBtn" title="展开侧栏">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /><path d="M14 9l3 3-3 3" /></svg>
+            </button>
+            <div class="crumb" data-i18n="downloads">文件</div>
+          </div>
+          <div class="head-right">
+            <button class="icon-btn" id="subtitleBtn" title="字幕显示 / 隐藏">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 14h4M14 14h3" /></svg>
+            </button>
+            <button class="icon-btn" id="settingsBtn" title="设置">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1A1.7 1.7 0 0 0 8.9 19a1.7 1.7 0 0 0-1.9.3l-.1.1-2.8-2.8.1-.1A1.7 1.7 0 0 0 4.5 15a1.7 1.7 0 0 0-1.6-1H3v-4h.1A1.7 1.7 0 0 0 4.5 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1 2.8-2.8.1.1A1.7 1.7 0 0 0 8.9 4.5 1.7 1.7 0 0 0 10 2.9V3h4v-.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2.8 2.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1z" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="content-inner">
+          <div class="title-block">
+            <h1 id="mediaTitle" data-i18n="noFile">请添加本地文件</h1>
+            <p id="mediaSubtitle" data-i18n="noFileHint">点击左侧 + 添加视频或音频，也可以直接把文件拖进来</p>
+          </div>
+
+          <div class="stage-wrap">
+            <div id="stage" class="stage"></div>
+            <div id="stageEmpty" class="stage-empty">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M10 9l5 3-5 3z" /></svg>
+              <span data-i18n="stageEmpty">选择一段视频或音频开始练习</span>
+            </div>
+          </div>
+
+          <section class="ab-section">
+            <div class="ab-head">
+              <div class="ab-title">
+                <span>A-B <span data-i18n="loop">循环</span></span>
+                <span class="ab-info" id="abInfo"></span>
+              </div>
+              <div class="ab-tools">
+                <button class="icon-btn" id="micBtn" title="跟读录音">
+                  <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" /></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="ab-cards" id="abCards">
+              <div class="ab-card" id="cardA">
+                <span class="ab-label">A</span>
+                <div class="ab-value">
+                  <button class="nudge" data-nudge="A" data-dir="-1" title="起点后退 0.1 秒">‹</button>
+                  <span id="timeA" data-i18n="setStart">按 L 设起点</span>
+                  <button class="nudge" data-nudge="A" data-dir="1" title="起点前进 0.1 秒">›</button>
+                </div>
+              </div>
+              <div class="ab-link" id="abLink"></div>
+              <div class="ab-card" id="cardB">
+                <span class="ab-label">B</span>
+                <div class="ab-value">
+                  <button class="nudge" data-nudge="B" data-dir="-1" title="终点后退 0.1 秒">‹</button>
+                  <span id="timeB" data-i18n="setEnd">按 L 设终点</span>
+                  <button class="nudge" data-nudge="B" data-dir="1" title="终点前进 0.1 秒">›</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="ab-help" id="abHelp" data-i18n="abHelp"></p>
+
+            <div class="record-panel" id="recordPanel" hidden>
+              <div class="rec-tabs" id="recTabs">
+                <button class="rec-tab active" data-mode="listen-first" data-i18n="recFirst">听先再说</button>
+                <button class="rec-tab" data-mode="listen-speak" data-i18n="recBoth">边听边说</button>
+                <button class="rec-tab" data-mode="dub" data-i18n="recDub">配音</button>
+                <button class="rec-close" id="recClose" title="关闭">×</button>
+              </div>
+              <p class="rec-warn" id="recWarn" data-i18n="micHint"></p>
+              <div class="rec-actions">
+                <button class="btn btn-rec" id="recOnce"><span class="dot"></span><span data-i18n="recOnce">录一遍</span></button>
+                <button class="btn" id="recCont"><span data-i18n="recCont">连续录</span></button>
+                <span class="rec-status" id="recStatus"></span>
+              </div>
+              <div class="rec-progress" id="recProgress" hidden>
+                <div class="rec-progress-track"><div class="rec-progress-bar" id="recProgressBar"></div></div>
+                <span class="rec-progress-text" id="recProgressText">0:00 / 0:00</span>
+              </div>
+              <div class="rec-list" id="recList"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- 底部控制条 -->
+      <div class="playerbar">
+        <div class="timeline-row">
+          <span class="t-time" id="curTime">0:00</span>
+          <div class="timeline" id="timeline">
+            <div class="played" id="played"></div>
+            <div class="thumb" id="thumb"></div>
+          </div>
+          <span class="t-time" id="durTime">0:00</span>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-left">
+            <div class="toggle-wrap" id="loopToggleWrap">
+              <span class="toggle" id="loopToggle"><i></i></span>
+              <span>A-B <span data-i18n="loop">循环</span></span>
+            </div>
+            <div class="menu-anchor">
+              <button class="mini-select" id="pauseEachBtn"><span id="pauseEachLabel" data-i18n="pauseEach">每句停</span> <span class="chev">⌃</span></button>
+              <div class="mini-menu" id="pauseEachMenu" hidden></div>
+            </div>
+          </div>
+          <div class="ctrl-center">
+            <button class="ctrl-icon" id="prevBtn" title="上一个音频">
+              <svg viewBox="0 0 24 24"><path d="M18 5v14L8 12zM6 5v14" /></svg>
+            </button>
+            <button class="ctrl-icon" id="rewBtn" title="后退 5 秒">
+              <svg viewBox="0 0 24 24"><path d="M4 9a8 8 0 1 1 0 6M4 4v5h5" /></svg><span class="ctl-num">5</span>
+            </button>
+            <button class="play-btn" id="playBtn" title="播放 / 暂停">
+              <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5l11 7-11 7z" /></svg>
+            </button>
+            <button class="ctrl-icon" id="ffBtn" title="前进 5 秒">
+              <svg viewBox="0 0 24 24"><path d="M20 9a8 8 0 1 0 0 6M20 4v5h-5" /></svg><span class="ctl-num">5</span>
+            </button>
+            <button class="ctrl-icon" id="nextBtn" title="下一个音频">
+              <svg viewBox="0 0 24 24"><path d="M6 5v14l10-7zM18 5v14" /></svg>
+            </button>
+          </div>
+          <div class="ctrl-right">
+            <div class="menu-anchor">
+              <button class="mini-select" id="speedBtn"><span id="speedLabel">1.0×</span> <span class="chev">⌃</span></button>
+              <div class="mini-menu" id="speedMenu" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-card settings-card">
+      <div class="modal-head">
+        <h2 data-i18n="settings">设置</h2>
+        <button class="icon-btn" id="settingsClose" title="关闭">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="set-row">
+          <label data-i18n="language">界面语言</label>
+          <div class="seg" id="langSeg">
+            <button data-lang="system" data-i18n="followSystem">跟随系统</button>
+            <button data-lang="zh" class="active">简体中文</button>
+            <button data-lang="en">English</button>
+          </div>
+        </div>
+        <hr />
+        <div class="set-block">
+          <h3 data-i18n="gettingStarted">入门</h3>
+          <div class="set-item">
+            <div><strong data-i18n="demoTitle">示例练习</strong><p data-i18n="demoDesc">用一段约 30 秒的示例音频，练一遍播放、放慢、循环和跟读。</p></div>
+            <button class="btn" id="demoBtn" data-i18n="start">开始</button>
+          </div>
+        </div>
+        <hr />
+        <div class="set-block">
+          <h3 data-i18n="shortcuts">快捷键</h3>
+          <p class="set-note" data-i18n="shortcutNote"></p>
+          <div class="shortcut-grid" id="shortcutList"></div>
+          <button class="btn btn-ghost" id="resetKeys" data-i18n="resetKeys">恢复默认快捷键</button>
+        </div>
+        <hr />
+        <div class="set-block">
+          <h3 data-i18n="playback">播放</h3>
+          <div class="set-row"><label data-i18n="skipSeconds">快进 / 快退秒数</label><input type="number" id="skipSec" min="1" max="30" value="5" /></div>
+          <div class="set-row"><label data-i18n="defaultSpeed">默认倍速</label><select id="defaultSpeed"><option>0.75</option><option selected>1.0</option><option>1.25</option><option>1.5</option></select></div>
+          <div class="set-row"><label data-i18n="autoLoop">循环后回到 A 点继续</label><input type="checkbox" id="autoLoopOn" checked /></div>
+          <div class="set-row"><label data-i18n="voiceBoost">音量增强 · 放大录音音量</label><input type="checkbox" id="voiceBoostOn" /></div>
+          <div class="set-row"><label data-i18n="origDuck">原音减弱 · 降低素材音量</label><input type="checkbox" id="origDuckOn" /></div>
+          <p class="set-note" data-i18n="audioTuneNote">音量增强直接放大麦克风录入的音量；原音减弱会在配音混音与同步对比时压低素材音量，让跟读更清楚。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <input id="fileInput" type="file" accept="video/*,audio/*" multiple hidden />
+  <script src="js/main.js"></script>
+</body>
+
+</html>
